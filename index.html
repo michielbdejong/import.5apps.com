@@ -14,42 +14,8 @@
   </head>
   <body>
     <article>
-      <h3>when you get "Unknown event 'not-connected'", do remoteStorage.reset(), refresh, click GD connect (you'll get "TypeError: this.rs[options.special] is undefined"), refresh again, click GD connect again, it will work the second time after a reset.</h3> 
-      <input type="file" id="files" name="files[]" multiple />
-      <output id="list"></output>
-
-      <script>
-        function handleFileSelect(evt) {
-          var files = evt.target.files; // FileList object
-
-          // files is a FileList of File objects. List some properties.
-          var output = [];
-          for (var i = 0, f; f = files[i]; i++) {
-            output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
-                        f.size, ' bytes, last modified: ',
-                        f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
-                        '</li>');
-            var reader = new FileReader();
-
-            // Closure to capture the file information.
-            reader.onload = (function(theFile) {
-              return function(e) {
-                console.log(e.target.result);
-                document.datalib.set(JSON.parse(e.target.result));
-              };
-            })(f);
-
-            // Read in the file as a data URL.
-            reader.readAsText(f);
-          }
-          document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
-        }
-
-        document.getElementById('files').addEventListener('change', handleFileSelect, false);
-      </script>
-    </article>
-    <article>
-      <input type="submit" value="export" onmousedown="exp();" />
+      <ul>
+        <li>(root)<input type="submit" value=">" onclick="expandOne('');" id="path-"></li>
     </article>
   </body>
 
@@ -89,8 +55,11 @@
   <script src="vendor/remotestorage/legacy.js"></script>
   <script src="vendor/remotestorage/googledrive.js"></script>
   <script src="vendor/remotestorage/dropbox.js"></script>
-  <script>remoteStorage = new RemoteStorage();
-    </script>
+  <script>
+    RemoteStorage._log = true;
+    RemoteStorage.prototype.reset = function() { indexedDB.deleteDatabase('remotestorage'); localStorage.clear(); };
+    remoteStorage = new RemoteStorage();
+  </script>
   <script>
     var data = {}, foldersPending = 0, documentsPending = 0, modules = {
       "articles":true,"bookmarks":true,"binaryTest":true,"credentials-sockethub":true,"code":true,"contacts":true,"email":true,"credentials-twitter":true,
@@ -132,6 +101,7 @@
         console.log(a);
       });
     }
+
     remoteStorage.enableLog();
     remoteStorage.setApiKeys('googledrive', {
       //see https://console.developers.google.com/project/appunhosted/apiui/credential
@@ -139,7 +109,17 @@
       client_id: '709507725318-3mt4ke1d4tvkc7ktbjvru3csif4nsk67.apps.googleusercontent.com'
     });
     remoteStorage.displayWidget();
-    //remoteStorage.access.claim('*', 'rw');
+    remoteStorage.access.claim('*', 'rw');
+    function expandOne(path) {
+      remoteStorage.scope('/').getListing(path, 1000000).then(function(listing) {
+        var i, str = '<ul>';
+         for (i in listing) {
+          str += '<li>'+i+'<input type="submit" value=">" onclick="expandOne(\''+i+'\');" id="path-'+(i.split('-').join('--'))+'"></li>';
+        }
+        document.getElementById('path-').innerHTML = str+'</ul>';
+      });
+    }
+    
     //getEverything('');
     //remoteStorage.scope('/').cache('');
  //   for(i in modules) {

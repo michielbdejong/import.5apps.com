@@ -95,6 +95,12 @@
       RS.Authorize(AUTH_URL, AUTH_SCOPE, String(RS.Authorize.getLocation()), this.clientId);
     },
 
+    stopWaitingForToken: function() {
+      if (!this.connected) {
+        this._emit('not-connected');
+      }
+    },
+
     get: function(path, options) {
       if (path.substr(-1) === '/') {
         return this._getFolder(path, options);

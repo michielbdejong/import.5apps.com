@@ -295,6 +295,7 @@
     },
     autoMerge: function(obj) {
       var newValue, oldValue, i;
+      RemoteStorage.log('autoMerge', obj);
       if (!obj.remote) {
         return obj;
       }
@@ -319,6 +320,9 @@
             delete obj.remote;
           }
         }
+        obj.common = obj.remote;
+        delete obj.remote;
+        RemoteStorage.log('autoMerged remotely created node, returns:', obj);
         return obj;
       }
       if (obj.path.substr(-1) === '/') {
@@ -338,6 +342,7 @@
             }
           }
         }
+        RemoteStorage.log('autoMerged fetched folder, returns:', obj);
         return obj;
       } else {
         if (obj.remote.body !== undefined) {
@@ -587,6 +592,7 @@
         if (action === 'get') {
           if (statusMeaning.notFound) {
             if (path.substr(-1) === '/') {
+              RemoteStorage.log('treating 404 as empty folder');
               bodyOrItemsMap = {};
             } else {
               bodyOrItemsmap = false;
@@ -599,7 +605,9 @@
                   RemoteStorage.log('WARNING: discarding corrupt folder description from server for ' + path);
                   return false;
                 } else {
+                  RemoteStorage.log('handling non-corrupt folder response; marking children');
                   return this.markChildren(path, bodyOrItemsMap, dataFromFetch.toBeSaved, dataFromFetch.missingChildren).then(function() {
+                    RemoteStorage.log('children marked, returning true');
                     return true;//task completed
                   });
                 }
@@ -646,11 +654,14 @@
           RemoteStorage.log('wireclient rejects its promise!', obj.path, obj.action, err);
           return this.handleResponse(obj.path, obj.action, 'offline');
         }.bind(this)).then(function(completed) {
+          RemoteStorage.log('task finished, completed:', completed);
           delete this._timeStarted[obj.path];
           delete this._running[obj.path];
           if (completed) {
+            RemoteStorage.log('this._tasks to complete', this._tasks, obj.path);
             if (this._tasks[obj.path]) {
               for(i=0; i<this._tasks[obj.path].length; i++) {
+                RemoteStorage.log('calling back', i);
                 this._tasks[obj.path][i]();
               }
               delete this._tasks[obj.path];
@@ -720,6 +731,7 @@
         return promise;
       }
       return this.checkDiffs().then(function(numDiffs) {
+        RemoteStorage.log('checkDiffs done; numDiffs, alsoCheckRefresh:', numDiffs, alsoCheckRefresh);
         if (numDiffs || alsoCheckRefresh === false) {
           promise = promising();
           promise.fulfill();

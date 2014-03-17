@@ -61,7 +61,7 @@
 
   RS.GoogleDrive = function(remoteStorage, clientId) {
 
-    RS.eventHandling(this, 'connected');
+    RS.eventHandling(this, 'connected', 'not-connected');
 
     this.rs = remoteStorage;
     this.clientId = clientId;

@@ -169,6 +169,8 @@
   };
 
   RS.Dropbox.prototype = {
+    online: true,
+
     /**
      * Method : connect()
      *   redirects to AUTH_URL(https://www.dropbox.com/1/oauth2/authorize)

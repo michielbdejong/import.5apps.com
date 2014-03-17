@@ -74,6 +74,7 @@
   };
 
   RS.GoogleDrive.prototype = {
+    online: true,
 
     configure: function(_x, _y, _z, token) { // parameter list compatible with WireClient
       if (token) {

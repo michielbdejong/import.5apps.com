@@ -15,7 +15,7 @@
   <body>
     <article>
       <ul>
-        <li>(root)<input type="submit" value=">" onclick="expandOne('');" id="path-"></li>
+        <li>(root)<div id="path-"><input type="submit" value=">" onclick="expandOne('');"></div></li>
     </article>
   </body>
 
@@ -61,39 +61,6 @@
     remoteStorage = new RemoteStorage();
   </script>
   <script>
-    var data = {}, foldersPending = 0, documentsPending = 0, modules = {
-      "articles":true,"bookmarks":true,"binaryTest":true,"credentials-sockethub":true,"code":true,"contacts":true,"email":true,"credentials-twitter":true,
-      "documents":true,"events":true,"feeds":true,"gruppenkasse":true,"money":true,"inbox":true,"messages":true,"notes":true,"myfavoritedrinks":true,
-      "pictures":true,"playlists":true,"presentations":true,"rss":true,"public":true,"sandwiches":true,"sharedstuff":true,"sockethub":true,"songs":true,
-      "tasks":true,"todomvc":true,"todo-list":true,"tutorial":true
-    };
-    function getEverything(prefix) {
-      foldersPending++;
-      remoteStorage.scope('/').getListing(prefix).then(function(listing) {
-        console.log(prefix, listing);
-        for (i in listing) {
-          if(i.substr(-1) === '/') {
-            console.log('descending into', prefix+i);
-            getEverything(prefix+i);
-          } else {
-            documentsPending++;
-            remoteStorage.scope('/').getFile(prefix+i).then((function(closurePath) {
-              return function(obj) {
-                documentsPending--;
-                data[closurePath] = obj;
-              };
-            })(prefix+i), function(err) {
-              console.log('error in getEverything', err);
-              documentsPending--;
-            });
-          }
-        }
-        foldersPending--;
-      }, function(err) {
-        console.log('error in getEverything', err);
-        foldersPending--;
-      });
-    }
     function d(p) {
       p.then(function(a) {
         console.log(a);
@@ -112,20 +79,26 @@
     remoteStorage.access.claim('*', 'rw');
     function expandOne(path) {
       remoteStorage.scope('/').getListing(path, 1000000).then(function(listing) {
-        var i, str = '<ul>';
-         for (i in listing) {
-          str += '<li>'+i+'<input type="submit" value=">" onclick="expandOne(\''+i+'\');" id="path-'+(i.split('-').join('--'))+'"></li>';
+        var i, id, str = '<ul>', parentId;
+        parentId = 'path-'+(path.split('-').join('--').split('/').join('-'));
+        for (i in listing) {
+          id = parentId+(i.split('-').join('--').split('/').join('-'));
+          escapedPath = (path+i).split('\'').join('\\\'');
+          if (i.substr(-1) === '/') {
+            str += '<li>'+i+'<div id="'+id+'"><input type="submit" value=">" onclick="expandOne(\''+escapedPath+'\');"></div></li>';
+          } else {
+            str += '<li>'+i+'<div id="path-'+id+'"><input type="submit" value="v" onclick="download(\''+escapedPath+'\');"></div></li>';
+          }
         }
-        document.getElementById('path-').innerHTML = str+'</ul>';
+        console.log('expandOne', listing, parentId, str+'</ul>');
+        document.getElementById(parentId).innerHTML = str+'</ul>';
       });
     }
-    
-    //getEverything('');
-    //remoteStorage.scope('/').cache('');
- //   for(i in modules) {
- //     remoteStorage.access.claim(i, 'rw');
- //     remoteStorage.scope('/'+i+'/').cache('');
- //     getEverything(i+'/');
- //   }
+    function download(path) {
+      console.log('download', path);
+      remoteStorage.scope('/').getFile(path, 1000000).then(function(obj) {
+        alert(JSON.stringify(obj));
+      });
+    }
   </script>
 </html>

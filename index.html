@@ -132,6 +132,7 @@
         console.log(a);
       });
     }
+    remoteStorage.enableLog();
     remoteStorage.setApiKeys('googledrive', {
       //see https://console.developers.google.com/project/appunhosted/apiui/credential
       //and https://code.google.com/apis/console/b/0/?noredirect&pli=1#project:709507725318:overview
@@ -141,10 +142,10 @@
     //remoteStorage.access.claim('*', 'rw');
     //getEverything('');
     //remoteStorage.scope('/').cache('');
-    for(i in modules) {
-      remoteStorage.access.claim(i, 'rw');
-      remoteStorage.scope('/'+i+'/').cache('');
-      getEverything(i+'/');
-    }
+ //   for(i in modules) {
+ //     remoteStorage.access.claim(i, 'rw');
+ //     remoteStorage.scope('/'+i+'/').cache('');
+ //     getEverything(i+'/');
+ //   }
   </script>
 </html>

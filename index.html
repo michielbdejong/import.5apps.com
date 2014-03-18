@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>datalib</title>
+    <title>export.5apps.com</title>
     <style>
       body { font:15px sans-serif; line-height:1.4em; color:#222 }
       nav {float:left; margin:3em}
@@ -14,10 +14,11 @@
   </head>
   <body>
     <article>
-      <p>(tested with: starter-kit, reStore, 5apps*, GoogleDrive**, <strike>Dropbox</strike>)</p>
+      <p>(tested with: starter-kit, reStore, 5apps*, GoogleDrive**, Dropbox***)</p>
       <p>* to use with a 5apps draft-dejong-remotestorage-01 account, in the OAuth dialog you will see it requests access to '/root'.</p>
       <p>** only text files seem to work, and the fetch process is inefficient since it has to look up the file_id alll the time.</p>
       Remove the string 'root' from the URL to fix this</p>
+      <p>*** only available to short-listed Dropbox accounts until Dropbox approve production status. first bug found: root folder appears empty</p>
       <ul>
         <li>(root)<div id="path-"><input type="submit" value=">" onclick="expandOne('');"></div></li>
     </article>

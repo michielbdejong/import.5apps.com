@@ -374,7 +374,13 @@
         this._getFolder(parentPath(path)).then(function() {
           var id = this._fileIdCache.get(path);
           if (!id) {
-            callback('no file or folder found at the path: ' + path, null);
+            if (path.substr(-1) === '/') {
+              this._createFolder(path, function() {
+                this._getFileId(path, callback);
+              }.bind(this));
+            } else {
+              callback(null, null);
+            }
             return;
           }
           callback(null, id);

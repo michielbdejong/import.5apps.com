@@ -220,13 +220,24 @@
         } else {
           this._getMeta(id, function(metaError, meta) {
             var etagWithoutQuotes;
+            RemoteStorage.log('path, options, metaError, meta', path, options, metaError, meta);
             if (typeof(meta) === 'object' && typeof(meta.etag) === 'string') {
               etagWithoutQuotes = meta.etag.substring(1, meta.etag.length-1);
             }
             if (metaError) {
               promise.reject(metaError);
-            } else if (meta.downloadUrl) {
+            } else {
               var options = {};
+              if (!meta.downloadUrl) {
+                if(meta.exportLinks && meta.exportLinks['text/html']) {
+                  meta.mimeType += ';export=text/html';
+                  meta.downloadUrl = meta.exportLinks['text/html'];
+                } else { 
+                  // empty file
+                  promise.fulfill(200, '', meta.mimeType, etagWithoutQuotes);
+                  return;
+                }
+              }
               if (meta.mimeType.match(/charset=binary/)) {
                 options.responseType = 'blob';
               }
@@ -243,9 +254,6 @@
                   promise.fulfill(200, body, meta.mimeType, etagWithoutQuotes);
                 }
               });
-            } else {
-              // empty file
-              promise.fulfill(200, '', meta.mimeType, etagWithoutQuotes);
             }
           });
         }
